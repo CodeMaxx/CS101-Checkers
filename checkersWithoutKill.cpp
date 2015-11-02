@@ -324,13 +324,48 @@ class Game
 				}
 				Centre end(stop_i,stop_j);		
 						
-				if(m!=12 and user_piece[m].is_valid(end,1,1))							
+				if(m!=12 and user_piece[m].is_valid(end,1,0))							
 				{
+					Centre c=user_piece[m].cen;
 					user_piece[m].move(end);
+					if(abs(user_piece[m].cen.i-c.i)==2)
+					{
+						Centre kill_end1(user_piece[m].cen.i+2,user_piece[m].cen.j-2);
+						Centre kill_end2(user_piece[m].cen.i-2,user_piece[m].cen.j-2);
+									
+						int n=2;
+						
+						while(n!=0)
+						{
+							n=0;
+							Centre kill_end1(user_piece[m].cen.i+2,user_piece[m].cen.j-2);
+							while(user_piece[m].is_valid(kill_end1,1,0))
+								{
+									user_piece[m].move(kill_end1);
+									kill_end1=Centre(user_piece[m].cen.i-2,user_piece[m].cen.j-2);
+									n=1;
+								}
+							
+								
+							Centre kill_end2(user_piece[m].cen.i-2,user_piece[m].cen.j-2);
+							while(user_piece[m].is_valid(kill_end2,1,0))
+								{
+									user_piece[m].move(kill_end2);
+									kill_end2=Centre(user_piece[m].cen.i-2,user_piece[m].cen.j-2);
+									n=1;
+								}	
+							}
+						}
+					
+								
+						turn++;
+					
+					
 					user_moves=1;
 					if(user_piece[m].cen.j==0)
 						user_piece[m].c->setColor(COLOR("green"));
-				}								
+				}
+												
 				else
 				{
 					Text t(250,485,"INVALID MOVE");
