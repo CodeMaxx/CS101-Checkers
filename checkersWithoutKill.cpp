@@ -30,7 +30,7 @@ class Centre
 
 
 void remove_piece(Centre cen,Centre end);
-void check_result();
+void check_result(int i);
 enum occupied_by{USER,COMP,NONE};
 
 class Board
@@ -124,12 +124,9 @@ class Pieces
 	}
 			
 		
-	bool is_valid(Centre end,int n,int m)
+	bool is_valid(Centre end,int n)
 	{
-		if(m!=0)		
-			if((turn%2==1 and box[cen.i][cen.j].ocby==COMP) or (turn%2==0 and box[cen.i][cen.j].ocby==USER))
-				return false;
-			
+		
 		if(box[end.i][end.j].is_occupied==true)
 			return false;
 			
@@ -140,17 +137,10 @@ class Pieces
 			return false;
 			
 		if(	abs(cen.i-end.i)==2 and abs(cen.j-end.j)==2 and kill_possible(end))
-			{
-				if(m!=0)
-					turn++;
 				return true;
-			}
 			
 		if(abs(cen.i-end.i)!=1 or abs(cen.j-end.j)!=1)
 			return false;
-		
-		if(m!=0)
-			turn++;	
 		
 		return true;
 		
@@ -324,7 +314,7 @@ class Game
 				}
 				Centre end(stop_i,stop_j);		
 						
-				if(m!=12 and user_piece[m].is_valid(end,1,0))							
+				if(m!=12 and user_piece[m].is_valid(end,1))							
 				{
 					Centre c=user_piece[m].cen;
 					user_piece[m].move(end);
@@ -339,7 +329,7 @@ class Game
 						{
 							n=0;
 							Centre kill_end1(user_piece[m].cen.i+2,user_piece[m].cen.j-2);
-							while(user_piece[m].is_valid(kill_end1,1,0))
+							while(user_piece[m].is_valid(kill_end1,1))
 								{
 									user_piece[m].move(kill_end1);
 									kill_end1=Centre(user_piece[m].cen.i-2,user_piece[m].cen.j-2);
@@ -348,7 +338,7 @@ class Game
 							
 								
 							Centre kill_end2(user_piece[m].cen.i-2,user_piece[m].cen.j-2);
-							while(user_piece[m].is_valid(kill_end2,1,0))
+							while(user_piece[m].is_valid(kill_end2,1))
 								{
 									user_piece[m].move(kill_end2);
 									kill_end2=Centre(user_piece[m].cen.i-2,user_piece[m].cen.j-2);
@@ -379,7 +369,7 @@ class Game
 					
 			}while(true);
 			
-			check_result();
+			check_result(1);
 			
 		{	
 			Text your(250,475,"MY TURN");
@@ -404,7 +394,7 @@ class Game
 					Centre kill_end2(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
 					Centre end(comp_piece[choose_random].cen.i+t*1,comp_piece[choose_random].cen.j+1);
 					
-					if(comp_piece[choose_random].is_valid(kill_end1,-1,0))
+					if(comp_piece[choose_random].is_valid(kill_end1,-1))
 					{
 						comp_piece[choose_random].move(kill_end1);
 						int n=2;
@@ -413,7 +403,7 @@ class Game
 						{
 							n=0;
 							Centre kill_end1(comp_piece[choose_random].cen.i+2,comp_piece[choose_random].cen.j+2);
-							while(comp_piece[choose_random].is_valid(kill_end1,-1,0))
+							while(comp_piece[choose_random].is_valid(kill_end1,-1))
 								{
 									comp_piece[choose_random].move(kill_end1);
 									kill_end1=Centre(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
@@ -422,7 +412,7 @@ class Game
 							
 								
 							Centre kill_end2(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
-							while(comp_piece[choose_random].is_valid(kill_end2,-1,0))
+							while(comp_piece[choose_random].is_valid(kill_end2,-1))
 								{
 									comp_piece[choose_random].move(kill_end2);
 									kill_end2=Centre(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
@@ -438,7 +428,7 @@ class Game
 						
 					}
 					
-					else if(comp_piece[choose_random].is_valid(kill_end2,-1,0))
+					else if(comp_piece[choose_random].is_valid(kill_end2,-1))
 					{
 						comp_piece[choose_random].move(kill_end2);
 						int n=2;
@@ -447,7 +437,7 @@ class Game
 						{
 							n=0;
 							Centre kill_end1(comp_piece[choose_random].cen.i+2,comp_piece[choose_random].cen.j+2);
-							while(comp_piece[choose_random].is_valid(kill_end1,-1,0))
+							while(comp_piece[choose_random].is_valid(kill_end1,-1))
 								{
 									comp_piece[choose_random].move(kill_end1);
 									kill_end1=Centre(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
@@ -456,7 +446,7 @@ class Game
 							
 								
 							Centre kill_end2(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
-							while(comp_piece[choose_random].is_valid(kill_end2,-1,0))
+							while(comp_piece[choose_random].is_valid(kill_end2,-1))
 								{
 									comp_piece[choose_random].move(kill_end2);
 									kill_end2=Centre(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
@@ -471,9 +461,10 @@ class Game
 						break;
 					}
 					
-					else if(comp_piece[choose_random].is_valid(end,-1,1))
+					else if(comp_piece[choose_random].is_valid(end,-1))
 					{
 						comp_piece[choose_random].move(end);
+						turn++;
 						if(comp_piece[choose_random].cen.j==7)
 							comp_piece[choose_random].c->setColor(COLOR("yellow"));
 						break;
@@ -484,7 +475,7 @@ class Game
 		}
 		
 		
-		check_result();
+		check_result(-1);
 									
 		}
 	}
@@ -517,7 +508,7 @@ class Game
 
 Game g;
 
-void check_result()
+void check_result(int i)
 {
 	int user=0;								
 	int comp=0;
@@ -548,25 +539,25 @@ void check_result()
 	
 		if(comp_piece[i].cen.i!=-1)
 		{
-			if(comp_piece[i].is_valid(ckill_end1,-1,0))
+			if(comp_piece[i].is_valid(ckill_end1,-1))
 				c_moves++;
-			if(comp_piece[i].is_valid(ckill_end2,-1,0))
+			if(comp_piece[i].is_valid(ckill_end2,-1))
 				c_moves++;
-			if(comp_piece[i].is_valid(cend1,-1,0))
+			if(comp_piece[i].is_valid(cend1,-1))
 				c_moves++;
-			if(comp_piece[i].is_valid(cend2,-1,0))
+			if(comp_piece[i].is_valid(cend2,-1))
 				c_moves++;
 		}
 		
 		if(user_piece[i].cen.i!=-1)
 		{			
-			if(user_piece[i].is_valid(ukill_end1,1,0))
+			if(user_piece[i].is_valid(ukill_end1,1))
 				u_moves++;		
-			if(user_piece[i].is_valid(ukill_end2,1,0))
+			if(user_piece[i].is_valid(ukill_end2,1))
 				u_moves++;
-			if(user_piece[i].is_valid(uend1,1,0))
+			if(user_piece[i].is_valid(uend1,1))
 				u_moves++;
-			if(user_piece[i].is_valid(uend2,1,0))
+			if(user_piece[i].is_valid(uend2,1))
 				u_moves++;
 		}
 		
@@ -581,18 +572,10 @@ void check_result()
 	if(comp<=2 or u_king==3)		
 		g.result(true);
 	
-	if(u_moves==0 and c_moves==0)
-	{
-		Text draw1(250,465,"ITS A DRAW!");
-		Text draw2(250,480,"Well Played");
-		getClick();
-		exit(0);
-	}
-	
-	if(u_moves==0)						
+	if(u_moves==0 and i==-1)						
 		g.result(false);
 	
-	if(c_moves==0)
+	if(c_moves==0 and i==1)
 		g.result(true);
 }
 
