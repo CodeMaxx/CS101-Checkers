@@ -369,17 +369,68 @@ class Game
 					Centre kill_end2(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
 					Centre end(comp_piece[choose_random].cen.i+t*1,comp_piece[choose_random].cen.j+1);
 					
-					if(comp_piece[choose_random].is_valid(kill_end1,-1,1))
+					if(comp_piece[choose_random].is_valid(kill_end1,-1,0))
 					{
 						comp_piece[choose_random].move(kill_end1);
+						int n=2;
+						
+						while(n!=0)
+						{
+							n=0;
+							Centre kill_end1(comp_piece[choose_random].cen.i+2,comp_piece[choose_random].cen.j+2);
+							while(comp_piece[choose_random].is_valid(kill_end1,-1,0))
+								{
+									comp_piece[choose_random].move(kill_end1);
+									kill_end1=Centre(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
+									n=1;
+								}
+							
+								
+							Centre kill_end2(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
+							while(comp_piece[choose_random].is_valid(kill_end2,-1,0))
+								{
+									comp_piece[choose_random].move(kill_end2);
+									kill_end2=Centre(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
+									n=1;
+								}	
+						}
+						
+						turn++;
+							
 						if(comp_piece[choose_random].cen.j==7)
 							comp_piece[choose_random].c->setColor(COLOR("yellow"));
 						break;
+						
 					}
 					
-					else if(comp_piece[choose_random].is_valid(kill_end2,-1,1))
+					else if(comp_piece[choose_random].is_valid(kill_end2,-1,0))
 					{
 						comp_piece[choose_random].move(kill_end2);
+						int n=2;
+						
+						while(n!=0)
+						{
+							n=0;
+							Centre kill_end1(comp_piece[choose_random].cen.i+2,comp_piece[choose_random].cen.j+2);
+							while(comp_piece[choose_random].is_valid(kill_end1,-1,0))
+								{
+									comp_piece[choose_random].move(kill_end1);
+									kill_end1=Centre(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
+									n=1;
+								}
+							
+								
+							Centre kill_end2(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
+							while(comp_piece[choose_random].is_valid(kill_end2,-1,0))
+								{
+									comp_piece[choose_random].move(kill_end2);
+									kill_end2=Centre(comp_piece[choose_random].cen.i-2,comp_piece[choose_random].cen.j+2);
+									n=1;
+								}	
+						}
+						
+						turn++;
+													
 						if(comp_piece[choose_random].cen.j==7)
 							comp_piece[choose_random].c->setColor(COLOR("yellow"));
 						break;
