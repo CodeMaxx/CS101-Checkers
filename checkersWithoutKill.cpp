@@ -30,6 +30,7 @@ class Centre
 
 
 void remove_piece(Centre cen,Centre end);
+void remove_virt_piece(Centre cen,Centre end);
 void check_result(int i);
 enum occupied_by{USER,COMP,NONE};
 
@@ -136,7 +137,7 @@ class Pieces
 		{
 			virt_box[cen.i+(end.i-cen.i)/2][cen.j+(end.j-cen.j)/2].ocby=NONE;
 			virt_box[cen.i+(end.i-cen.i)/2][cen.j+(end.j-cen.j)/2].toggle_state();
-			remove_piece(cen,end);
+			remove_virt_piece(cen,end);
 		}
 		virt_box[cen.i][cen.j].toggle_state();
 		virt_box[cen.i][cen.j].ocby=NONE;
@@ -209,6 +210,65 @@ void remove_piece(Centre cen,Centre end)
 		}
 	}
 }
+
+void remove_virt_piece(Centre cen,Centre end)
+{
+	for(int n=0;n<12;n++)
+	{
+		if(virt_box[cen.i][cen.j].ocby==COMP and virt_user[n].cen.i==cen.i+(end.i-cen.i)/2 and virt_user[n].cen.j==cen.j+1)
+		{						
+			virt_user[n].cen.i=-1;
+			virt_user[n].cen.j=-1;		
+			*(virt_user[n].c)=Circle(0,0,0);
+			break;
+		}
+		else if(virt_box[cen.i][cen.j].ocby==USER and virt_comp[n].cen.i==cen.i+(end.i-cen.i)/2 and virt_comp[n].cen.j==cen.j-1)
+		{
+			*(virt_comp[n].c)=Circle(0,0,0);
+			virt_comp[n].cen.i=-1;
+			virt_comp[n].cen.j=-1;
+			break;
+		}
+	}
+}
+
+void intel(Pieces &virt,Centre &cen,int &k,int n)
+{
+	k=k+n*20;
+	
+	virt.virt_move(cen);
+	int m=2;
+	
+	while(m!=0)
+	{
+		m=0;
+		Centre kill_end1(virt.cen.i+2,virt.cen.j+2);
+		while(virt.is_valid(kill_end1,-1))
+			{
+				virt.virt_move(kill_end1);
+				kill_end1=Centre(virt.cen.i-2,virt.cen.j+2);
+				m=1;
+				k=k+n*20;
+				
+			}
+		
+			
+		Centre kill_end2(virt.cen.i-2,virt.cen.j+2);
+		while(virt.is_valid(kill_end2,-1))
+			{
+				virt.virt_move(kill_end2);
+				kill_end2=Centre(virt.cen.i-2,virt.cen.j+2);
+				m=1;
+				k=k+n*20;
+			}	
+	}
+	
+	if(virt.cen.j==7)
+		k=k+n*50;
+}
+				
+		
+		
 				
 class Game
 {
@@ -435,6 +495,11 @@ class Game
 				virt_user[z]=user_piece[z];
 				virt_user[z].c=new Circle;
 				*(virt_user[z].c)=Circle(virt_user[z].cen.i,virt_user[z].cen.j,0);
+				
+				delete virt_comp[z].c;
+				virt_comp[z]=comp_piece[z];
+				virt_comp[z].c=new Circle;
+				*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
 			}
 			
 			for(int i=0;i<8;i++)
@@ -458,117 +523,66 @@ class Game
 			{
 				
 				if(virt_comp[i].cen.i!=-1)
-				{
-					//int k=comp_piece[i].intelligent(-1); //j*65536+max
+				{					
 					
 					Centre kill_end1(virt_comp[i].cen.i+2,virt_comp[i].cen.j+2);
 					Centre kill_end2(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
-					Centre end1(virt_comp[i].cen.i+1,virt_comp[i].cen.j+1);
-					Centre edn2(virt_comp[i].cen.i-1,virt_comp[i].cen.j+1);
+					//Centre end1(virt_comp[i].cen.i+1,virt_comp[i].cen.j+1);
+					//Centre edn2(virt_comp[i].cen.i-1,virt_comp[i].cen.j+1);
 					
 					int k1=0,k2=0;
 					
 					if(virt_comp[i].is_valid(kill_end1,-1))
-					{
-						k1=k1+20;
-						virt_comp[i].virt_move(kill_end1);
-						int n=2;
+					{	
+						intel(virt_comp[i],kill_end1,k1,1);
 						
-						while(n!=0)
+						for(int z=0;z<12;z++)
 						{
-							n=0;
-							Centre kill_end1(virt_comp[i].cen.i+2,virt_comp[i].cen.j+2);
-							while(virt_comp[i].is_valid(kill_end1,-1))
-								{
-									virt_comp[i].virt_move(kill_end1);
-									kill_end1=Centre(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
-									n=1;
-									k1=k1+20;
-								}
+							delete virt_user[z].c ;
+							virt_user[z]=user_piece[z];
+							virt_user[z].c=new Circle;
+							*(virt_user[z].c)=Circle(virt_user[z].cen.i,virt_user[z].cen.j,0);
 							
-								
-							Centre kill_end2(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
-							while(virt_comp[i].is_valid(kill_end2,-1))
-								{
-									virt_comp[i].virt_move(kill_end2);
-									kill_end2=Centre(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
-									n=1;
-									k1=k1+20;
-								}	
+							delete virt_comp[z].c;
+							virt_comp[z]=comp_piece[z];
+							virt_comp[z].c=new Circle;
+							*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
 						}
 						
-						if(virt_comp[i].cen.j==7)
-							k1=k1+50;
-					}
-					
-					/*for(int z=0;z<12;z++)
-					{
-						delete virt_comp[z].c ;
-						virt_comp[z]=comp_piece[z];    //requires operator overloading-pointer creating problem
-						
-						virt_comp[z].c=new Circle;  //might get rid of above requirement
-						*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
-					}
-					
-					for(int i=0;i<8;i++)
-					{
-						for(int j=0;j<8;j++)
+						for(int i=0;i<8;i++)
 						{
-						virt_box[i][j]=box[i][j];
+							for(int j=0;j<8;j++)
+							{
+							virt_box[i][j]=box[i][j];
+							}
 						}
-					}*/
-					
-					
+					}
+			
 					if(virt_comp[i].is_valid(kill_end2,-1))
 					{
-						k2=k2+20;
-						virt_comp[i].virt_move(kill_end2);
-						int n=2;
-						
-						while(n!=0)
+						intel(virt_comp[i],kill_end2,k2,1);
+						for(int z=0;z<12;z++)
 						{
-							n=0;
-							Centre kill_end1(virt_comp[i].cen.i+2,virt_comp[i].cen.j+2);
-							while(virt_comp[i].is_valid(kill_end1,-1))
-								{
-									virt_comp[i].virt_move(kill_end1);
-									kill_end1=Centre(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
-									n=1;
-									k2=k2+20;
-								}
+							delete virt_user[z].c ;
+							virt_user[z]=user_piece[z];
+							virt_user[z].c=new Circle;
+							*(virt_user[z].c)=Circle(virt_user[z].cen.i,virt_user[z].cen.j,0);
 							
-								
-							Centre kill_end2(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
-							while(virt_comp[i].is_valid(kill_end2,-1))
-								{
-									virt_comp[i].virt_move(kill_end2);
-									kill_end2=Centre(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
-									n=1;
-									k2=k2+20;
-								}	
+							delete virt_comp[z].c;
+							virt_comp[z]=comp_piece[z];
+							virt_comp[z].c=new Circle;
+							*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
 						}
 						
-						if(virt_comp[i].cen.j==7)
-							k2=k2+50;
-					}
-					
-				/*	for(int z=0;z<12;z++)
-					{
-						delete virt_comp[z].c ;
-						virt_comp[z]=comp_piece[z];    //requires operator overloading-pointer creating problem
-						
-						virt_comp[z].c=new Circle;  //might get rid of above requirement
-						*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
-					}
-					
-					for(int i=0;i<8;i++)
-					{
-						for(int j=0;j<8;j++)
+						for(int i=0;i<8;i++)
 						{
-						virt_box[i][j]=box[i][j];
+							for(int j=0;j<8;j++)
+							{
+							virt_box[i][j]=box[i][j];
+							}
 						}
-					}*/
-					
+					}
+									
 					cout<<k1<<" "<<k2<<endl;
 					
 					if(k1==0 and k2==0)
@@ -592,6 +606,31 @@ class Game
 			cout<<"cool1"<<endl;
 			if(l==12)
 			{
+				/*int defeat[12];
+				
+				for(int i=0;i<12;i++)
+				{
+					int move_random=rand()%2;
+					int t;
+					if(move_random==0)
+						t=-1;
+					else
+						t=1;
+						
+					if(comp_piece[i].cen.i!=-1)
+					{
+						Centre end(comp_piece[i].cen.i+t*1,comp_piece[i].cen.j+1);
+						
+						if(comp_piece[i].is_valid(end,-1)
+						{
+							comp_piece[i].move(end);
+							
+							for(int j=0;j<12;j++)
+						*/	
+					
+				
+				
+				
 				while(true)
 				{
 					
@@ -651,7 +690,30 @@ class Game
 						comp_piece[index].move(kill_end2);
 						//wait(1);
 					}
+				
+				int n=2;
+						
+				while(n!=0)
+				{
+					n=0;
+					Centre kill_end1(comp_piece[index].cen.i+2,comp_piece[index].cen.j+2);
+					while(comp_piece[index].is_valid(kill_end1,-1))
+					{
+						comp_piece[index].move(kill_end1);
+						kill_end1=Centre(comp_piece[index].cen.i-2,comp_piece[index].cen.j+2);
+						n=1;
+					}
 					
+						
+					Centre kill_end2(comp_piece[index].cen.i-2,comp_piece[index].cen.j+2);
+					while(comp_piece[index].is_valid(kill_end2,-1))
+					{
+						comp_piece[index].move(kill_end2);
+						kill_end2=Centre(comp_piece[index].cen.i-2,comp_piece[index].cen.j+2);
+						n=1;
+					}	
+				}
+				
 				if(comp_piece[index].cen.j==7)
 				comp_piece[index].c->setColor(COLOR("yellow"));	
 				
@@ -790,9 +852,9 @@ class Game
 		
 		*/
 		
-		check_result(-1);
+			check_result(-1);
 		
-		for(int z=0;z<12;z++)
+			for(int z=0;z<12;z++)
 			{
 				delete virt_user[z].c;
 				virt_user[z]=user_piece[z];
