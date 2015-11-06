@@ -63,7 +63,9 @@ class Board
 };
 
 Board box[8][8];
-int turn=1; //Odd for User. Even for Computer
+Board virt_box[8][8];
+//int turn=1; //Odd for User. Even for Computer
+//int virt_turn=1;
 
 class Pieces
 {
@@ -73,11 +75,11 @@ class Pieces
 	Centre cen;
 	Centre aux;
 	
-	Pieces(int a,int b)
+	Pieces(int a,int b,int r)
 	: cen(a,b)
 	{
 		aux=cen.convert();
-		c = new Circle(aux.i,aux.j,20);
+		c = new Circle(aux.i,aux.j,r);
 	}
 	
 	Pieces()
@@ -88,7 +90,7 @@ class Pieces
 	{	
 		double x=50*(end.i-cen.i);
 		double y=50*(end.j-cen.j);
-		
+				
 		for(int i=0;i<650;i++)
 			c->move(x/650,y/650);
 			
@@ -112,6 +114,36 @@ class Pieces
 			
 		cen=end;
 	}
+	
+	void virt_move(Centre end)
+	{	
+		//double x=50*(end.i-cen.i);
+		//double y=50*(end.j-cen.j);
+				
+		//for(int i=0;i<650;i++)
+			//c->move(x/650,y/650);
+			
+			
+		//c->moveTo(75+50*end.i,75+50*end.j);
+		
+		virt_box[end.i][end.j].toggle_state();
+		if(virt_box[cen.i][cen.j].ocby==USER)
+			virt_box[end.i][end.j].ocby=USER;
+		else 
+			virt_box[end.i][end.j].ocby=COMP;
+			
+		if(	(end.i-cen.i)%2==0 and (end.j-cen.j)%2==0 )
+		{
+			virt_box[cen.i+(end.i-cen.i)/2][cen.j+(end.j-cen.j)/2].ocby=NONE;
+			virt_box[cen.i+(end.i-cen.i)/2][cen.j+(end.j-cen.j)/2].toggle_state();
+			remove_piece(cen,end);
+		}
+		virt_box[cen.i][cen.j].toggle_state();
+		virt_box[cen.i][cen.j].ocby=NONE;
+			
+		cen=end;
+	}
+	
 	
 	bool kill_possible(Centre end)
 	{
@@ -146,6 +178,7 @@ class Pieces
 		
 			
 	}
+	
 		
 };
 
@@ -153,6 +186,8 @@ class Pieces
 
 Pieces user_piece[12];
 Pieces comp_piece[12];
+Pieces virt_comp[12];
+Pieces virt_user[12];
 
 void remove_piece(Centre cen,Centre end)
 {
@@ -247,6 +282,13 @@ class Game
 			}
 		}
 		
+		for(int i=0;i<8;i++)
+		{
+			for(int j=0;j<8;j++)
+			{
+				virt_box[i][j]=box[i][j];
+			}
+		}
 		
 		int k=0;
 		for(int j=5;j<8;j++)
@@ -255,22 +297,37 @@ class Game
 			{
 				if((j+i)%2==0)
 				{
-					user_piece[k]=Pieces(i,j);
+					user_piece[k]=Pieces(i,j,20);
 					user_piece[k].c->setColor(COLOR("blue"));
 					user_piece[k].c->setFill(1);
-					comp_piece[k]=Pieces(7-i,7-j);
+					comp_piece[k]=Pieces(7-i,7-j,20);
 					comp_piece[k].c->setColor(COLOR("red"));
 					comp_piece[k].c->setFill(1);
-					
-					cout<<user_piece[k].cen.i<<" "<<user_piece[k].cen.j<<endl;
-					cout<<comp_piece[k].cen.i<<" "<<comp_piece[k].cen.j<<endl;
+				
 					k++;
-					cout<<k<<endl;
 				}
-				cout<<"LOOP OVER"<<endl;
 				
 			}
 		}
+		
+		k=0;
+		
+		for(int j=5;j<8;j++)
+		{
+			for(int i=0;i<8;i++)
+			{
+				if((j+i)%2==0)
+				{
+					virt_user[k]=Pieces(i,j,0);
+					virt_comp[k]=Pieces(7-i,7-j,0);
+				
+					k++;
+				}
+				
+			}
+		}
+		
+		
 		
 		cout<<"Entering while"<<endl;
 		while(true)
@@ -344,11 +401,11 @@ class Game
 									kill_end2=Centre(user_piece[m].cen.i-2,user_piece[m].cen.j-2);
 									n=1;
 								}	
-							}
 						}
+					}
 					
 								
-						turn++;
+					//	turn++;
 					
 					
 					user_moves=1;
@@ -370,12 +427,269 @@ class Game
 			}while(true);
 			
 			check_result(1);
+			cout<<"not dissapearing"<<endl;
+			wait(1);
+			for(int z=0;z<12;z++)
+			{
+				delete virt_user[z].c ;
+				virt_user[z]=user_piece[z];
+				virt_user[z].c=new Circle;
+				*(virt_user[z].c)=Circle(virt_user[z].cen.i,virt_user[z].cen.j,0);
+			}
+			
+			for(int i=0;i<8;i++)
+			{
+				for(int j=0;j<8;j++)
+				{
+				virt_box[i][j]=box[i][j];
+				}
+			}
+			
+			//virt_turn=turn;
+						
 			
 		{	
-			Text your(250,475,"MY TURN");
-			wait(1);			 
+			Text your(250,475,"MY TURN");			 
 			
-			while(true)
+			int score[12];
+			
+			
+			for(int i=0;i<12;i++)
+			{
+				
+				if(virt_comp[i].cen.i!=-1)
+				{
+					//int k=comp_piece[i].intelligent(-1); //j*65536+max
+					
+					Centre kill_end1(virt_comp[i].cen.i+2,virt_comp[i].cen.j+2);
+					Centre kill_end2(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
+					Centre end1(virt_comp[i].cen.i+1,virt_comp[i].cen.j+1);
+					Centre edn2(virt_comp[i].cen.i-1,virt_comp[i].cen.j+1);
+					
+					int k1=0,k2=0;
+					
+					if(virt_comp[i].is_valid(kill_end1,-1))
+					{
+						k1=k1+20;
+						virt_comp[i].virt_move(kill_end1);
+						int n=2;
+						
+						while(n!=0)
+						{
+							n=0;
+							Centre kill_end1(virt_comp[i].cen.i+2,virt_comp[i].cen.j+2);
+							while(virt_comp[i].is_valid(kill_end1,-1))
+								{
+									virt_comp[i].virt_move(kill_end1);
+									kill_end1=Centre(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
+									n=1;
+									k1=k1+20;
+								}
+							
+								
+							Centre kill_end2(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
+							while(virt_comp[i].is_valid(kill_end2,-1))
+								{
+									virt_comp[i].virt_move(kill_end2);
+									kill_end2=Centre(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
+									n=1;
+									k1=k1+20;
+								}	
+						}
+						
+						if(virt_comp[i].cen.j==7)
+							k1=k1+50;
+					}
+					
+					/*for(int z=0;z<12;z++)
+					{
+						delete virt_comp[z].c ;
+						virt_comp[z]=comp_piece[z];    //requires operator overloading-pointer creating problem
+						
+						virt_comp[z].c=new Circle;  //might get rid of above requirement
+						*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
+					}
+					
+					for(int i=0;i<8;i++)
+					{
+						for(int j=0;j<8;j++)
+						{
+						virt_box[i][j]=box[i][j];
+						}
+					}*/
+					
+					
+					if(virt_comp[i].is_valid(kill_end2,-1))
+					{
+						k2=k2+20;
+						virt_comp[i].virt_move(kill_end2);
+						int n=2;
+						
+						while(n!=0)
+						{
+							n=0;
+							Centre kill_end1(virt_comp[i].cen.i+2,virt_comp[i].cen.j+2);
+							while(virt_comp[i].is_valid(kill_end1,-1))
+								{
+									virt_comp[i].virt_move(kill_end1);
+									kill_end1=Centre(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
+									n=1;
+									k2=k2+20;
+								}
+							
+								
+							Centre kill_end2(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
+							while(virt_comp[i].is_valid(kill_end2,-1))
+								{
+									virt_comp[i].virt_move(kill_end2);
+									kill_end2=Centre(virt_comp[i].cen.i-2,virt_comp[i].cen.j+2);
+									n=1;
+									k2=k2+20;
+								}	
+						}
+						
+						if(virt_comp[i].cen.j==7)
+							k2=k2+50;
+					}
+					
+				/*	for(int z=0;z<12;z++)
+					{
+						delete virt_comp[z].c ;
+						virt_comp[z]=comp_piece[z];    //requires operator overloading-pointer creating problem
+						
+						virt_comp[z].c=new Circle;  //might get rid of above requirement
+						*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
+					}
+					
+					for(int i=0;i<8;i++)
+					{
+						for(int j=0;j<8;j++)
+						{
+						virt_box[i][j]=box[i][j];
+						}
+					}*/
+					
+					cout<<k1<<" "<<k2<<endl;
+					
+					if(k1==0 and k2==0)
+						score[i]=0;
+					else if(k2>k1)
+						score[i]=65536*k2+2;
+					else
+						score[i]=65536*k1+1;
+							
+				}
+			}
+					
+			int l;
+				
+			for(l=0;l<12;l++)
+			{
+				if(comp_piece[l].cen.i!=-1 and score[l]!=0)
+					break;
+			}
+			
+			cout<<"cool1"<<endl;
+			if(l==12)
+			{
+				while(true)
+				{
+					
+					int choose_random=rand()%12;
+					int move_random=rand()%2;
+					int t;
+					if(move_random==0)
+						t=-1;
+					else
+						t=1;
+							
+				//	cout<<choose_random<<" "<<move_random<<endl;
+					
+					if(comp_piece[choose_random].cen.i!=-1)
+					{
+						Centre end(comp_piece[choose_random].cen.i+t*1,comp_piece[choose_random].cen.j+1);
+						
+						if(comp_piece[choose_random].is_valid(end,-1))
+						{
+							comp_piece[choose_random].move(end);
+							//turn++;
+							if(comp_piece[choose_random].cen.j==7)
+								comp_piece[choose_random].c->setColor(COLOR("yellow"));
+								
+								cout<<"cool1"<<endl;
+								
+							break;
+						}
+					}
+					
+				}
+					
+			}
+			else				
+			{
+				int max=-1;
+				int index=-1;
+				for(int i=0;i<12;i++)
+				{
+					if(comp_piece[i].cen.i!=-1 and score[i]>max)
+					{
+						max=score[i];
+						index=i;
+					}
+				}
+				
+				Centre kill_end1(comp_piece[index].cen.i+2,comp_piece[index].cen.j+2);
+				Centre kill_end2(comp_piece[index].cen.i-2,comp_piece[index].cen.j+2);
+				
+				if(score[index]%65536==1)
+					{
+						comp_piece[index].move(kill_end1);
+					//	wait(1);
+					}
+				else
+					{
+						comp_piece[index].move(kill_end2);
+						//wait(1);
+					}
+					
+				if(comp_piece[index].cen.j==7)
+				comp_piece[index].c->setColor(COLOR("yellow"));	
+				
+				cout<<"cool1"<<endl;
+			
+			}
+			
+			cout<<"cool1"<<endl;
+			
+			/*for(int z=0;z<12;z++)
+			{
+				delete virt_comp[z].c ;
+				virt_comp[z]=comp_piece[z];    //requires operator overloading-pointer creating problem
+				
+				virt_comp[z].c=new Circle;  //might get rid of above requirement
+				*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
+			}
+			
+			for(int i=0;i<8;i++)
+			{
+				for(int j=0;j<8;j++)
+				{
+				virt_box[i][j]=box[i][j];
+				}
+			}*/
+			
+			cout<<"cool1"<<endl;
+			
+		}
+					
+					//k1=comp_piece[i].intelligent(kill_end1)
+					//k2=comp_piece[i].intelligent(kill_end2)
+					//m1=comp_piece[i].intelligent()
+					//m2=comp_piece[i].intelligent()
+				
+			
+			
+			/*while(true)
 			{
 				
 				int choose_random=rand()%12;
@@ -474,9 +788,32 @@ class Game
 			}	
 		}
 		
+		*/
 		
 		check_result(-1);
-									
+		
+		for(int z=0;z<12;z++)
+			{
+				delete virt_user[z].c;
+				virt_user[z]=user_piece[z];
+				virt_user[z].c=new Circle;
+				*(virt_user[z].c)=Circle(virt_user[z].cen.i,virt_user[z].cen.j,0);
+				
+				delete virt_comp[z].c;
+				virt_comp[z]=comp_piece[z];
+				virt_comp[z].c=new Circle;
+				*(virt_comp[z].c)=Circle(virt_comp[z].cen.i,virt_comp[z].cen.j,0);
+			}
+			
+			for(int i=0;i<8;i++)
+			{
+				for(int j=0;j<8;j++)
+				{
+				virt_box[i][j]=box[i][j];
+				}
+			}
+		
+								
 		}
 	}
 
