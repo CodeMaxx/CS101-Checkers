@@ -276,30 +276,37 @@ class Game
 	void instructions()
 	{
 		initCanvas("Checkers",500,500);
-		
+	
 		Text inst0(250,10,"INSTRUCTIONS");
+		inst0.setColor(COLOR("red"));
 		Text inst1(250,50,"OBJECTIVE");
-		Text inst2(250,62,"The object of the game is to take all your opponents pieces or place him in a ");
-		Text inst3(250,74,"position where he or she can no longer make any moves."); 
-		Text inst4(250,104,"TURNS");
-		Text inst5(250,116,"Players shall take turns at starting the game.The visitor shall start the ");
-		Text inst6(250,128,"first game.");
+		inst1.setColor(COLOR(100,150,120));
+		Text inst2(250,62,"The object of the game is to take 3 of your pieces to last line of your ");
+		Text inst3(250,74," opponent's side or kill your opponents pieces until they are less than 3 ");
+		Text inst4(250,86,"	or place him in a position where he or she can no longer make any moves."); 
+		Text inst5(250,116,"TURNS");
+		inst5.setColor(COLOR(100,150,120));
+		Text inst6(250,128,"Players shall take turns.The User shall start the game");
 		Text inst7(250,158,"OBLIGATION TO MOVE");
+		inst7.setColor(COLOR(100,150,120));
 		Text inst8(250,170,"A player has to move, a player who can no longer move loses.");
 		Text inst9(250,200,"MOVING PIECES");
-		Text inst10(250,212,"All pieces, men and kings, can move only diagonally.");
+		inst9.setColor(COLOR(100,150,120));
+		Text inst10(250,212,"All pieces can move only diagonally.");
 		Text inst11(250,224,"Pieces can only move to adjacent unoccupied black squares except when");
 		Text inst12(250,236,"making a jump (see below).");
-		Text inst13(250,248,"Men may only move and jump forwards while kings may move and jump");
-		Text inst14(250,260,"forwards as well as backwards.");
-		Text inst15(250,290,"OBLIGATION TO JUMP");
-		Text inst16(250,302,"If one player's piece has the opposing player's piece as a diagonal");
-		Text inst17(250,314,"neighbor and the square behind the opposing player's piece is unoccupied");
-		Text inst18(250,326,"the player can make a jump and remove his opponent's piece from the board.");
-		Text inst19(250,338,"If a player can make a jump such player has an obligation to make a jump.");
-		Text inst20(250,350,"If after making a jump another jump is possible the player must jump again");
-		Text inst21(250,362,"(with the exception of pieces that have just been crowned).");
+		Text inst13(250,248,"Pieces may only move and jump forwards");
+		Text inst15(250,278,"OBLIGATION TO JUMP");
+		inst15.setColor(COLOR(100,150,120));
+		Text inst16(250,290,"If one player's piece has the opposing player's piece as a diagonal");
+		Text inst17(250,302,"neighbor and the square behind the opposing player's piece is unoccupied");
+		Text inst18(250,314,"the player can make a jump and remove his opponent's piece from the board.");
+		Text inst19(250,326,"If a player makes such jump he or she has an obligation to make another ");
+		Text inst20(250,338,"jump if possible. This has been automated and the user need not click repeatedly.");
+		Text inst21(250,420,"LET THE GAME BEGIN!");
+		inst21.setColor(COLOR("blue"));
 		Text inst22(250,450,"CLICK TO PLAY!!");
+		inst22.setColor(COLOR("blue"));
 		
 		getClick();
 	}
@@ -606,32 +613,82 @@ class Game
 			cout<<"cool1"<<endl;
 			if(l==12)
 			{
-				/*int defeat[12];
-				
-				for(int i=0;i<12;i++)
+				int defeat[24];
+				for(int i=0;i<24;i++)
+					defeat[i]=0;
+					
+				for(int j=0;j<2;j++)
 				{
-					int move_random=rand()%2;
-					int t;
-					if(move_random==0)
-						t=-1;
-					else
-						t=1;
-						
-					if(comp_piece[i].cen.i!=-1)
+					for(int i=0;i<12;i++)
 					{
-						Centre end(comp_piece[i].cen.i+t*1,comp_piece[i].cen.j+1);
-						
-						if(comp_piece[i].is_valid(end,-1)
+						if(virt_comp[i].cen.i!=-1)
 						{
-							comp_piece[i].move(end);
+							Centre end;
 							
-							for(int j=0;j<12;j++)
-						*/	
+							if(j==0)
+								end=Centre(virt_comp[i].cen.i-1,virt_comp[i].cen.j+1);
+							else
+								end=Centre(virt_comp[i].cen.i+1,virt_comp[i].cen.j+1);
+						
+							if(end.j==7 and virt_comp[i].is_valid(end,-1))
+							{
+								defeat[12*j+i]=50;
+								break;
+							}
+							
+							if(end.i>0 and end.i<7 and virt_comp[i].is_valid(end,-1))
+							{
+								if(j==0)
+									if((virt_box[end.i+1][end.j+1].ocby==USER and virt_box[end.i-1][end.j-1].ocby==NONE) or (virt_box[end.i-1][end.j+1].ocby==USER and virt_box[end.i+1][end.j-1].ocby==COMP))
+										defeat[i]=-20;
+									else
+											defeat[i]=0;
+								else
+									if((virt_box[end.i+1][end.j+1].ocby==USER and virt_box[end.i-1][end.j-1].ocby==COMP) or (virt_box[end.i-1][end.j+1].ocby==USER and virt_box[end.i+1][end.j-1].ocby==NONE))
+										defeat[12+i]=-20;
+									else
+										defeat[12+i]=0;
+							}
+							else if((end.i==0 or end.i==7) and virt_comp[i].is_valid(end,-1))
+								defeat[12*j+i]=20;
+							else
+								defeat[12*j+i]=-100;
+							
+						}
+					}
+				}
+				
+				int max=-50;
+				int index=-1;
+				for(int i=0;i<24;i++)
+				{
+					if(comp_piece[i%12].cen.i!=-1 and defeat[i]>max)
+					{
+						max=defeat[i];
+						index=i;
+					}
+				}
+				cout<<max<< " "<<index<<endl;
+				Centre end1(comp_piece[index%12].cen.i-1,comp_piece[index%12].cen.j+1);
+				Centre end2(comp_piece[index%12].cen.i+1,comp_piece[index%12].cen.j+1);
+				
+				if(index<12)
+				{
+					comp_piece[index%12].move(end1);
+				}
+				else
+				{
+					comp_piece[index%12].move(end2);
+				}
+				
+				if(comp_piece[index%12].cen.j==7)
+					comp_piece[index%12].c->setColor(COLOR("yellow"));
+									
 					
 				
 				
 				
-				while(true)
+				/*while(true)
 				{
 					
 					int choose_random=rand()%12;
@@ -661,7 +718,7 @@ class Game
 						}
 					}
 					
-				}
+				}*/
 					
 			}
 			else				
