@@ -275,7 +275,6 @@ class Game
 	public:													//?????
 	void instructions()
 	{
-		initCanvas("Checkers",500,500);
 	
 		Text inst0(250,10,"INSTRUCTIONS");
 		inst0.setColor(COLOR("red"));
@@ -303,8 +302,11 @@ class Game
 		Text inst18(250,314,"the player can make a jump and remove his opponent's piece from the board.");
 		Text inst19(250,326,"If a player makes such jump he or she has an obligation to make another ");
 		Text inst20(250,338,"jump if possible. This has been automated and the user need not click repeatedly.");
-		Text inst21(250,420,"LET THE GAME BEGIN!");
+		Text inst21(250,370,"LET THE GAME BEGIN!");
 		inst21.setColor(COLOR("blue"));
+		Circle c(250,450,50);
+		c.setColor(COLOR(100,150,120));
+		c.setFill(1);
 		Text inst22(250,450,"CLICK TO PLAY!!");
 		inst22.setColor(COLOR("blue"));
 		
@@ -314,8 +316,6 @@ class Game
 
 	void start()
 	{
-		srand(time(NULL));
-		
 		for (int i=0;i<8;i++)
 		{
 			for(int j=0;j<8;j++)
@@ -404,7 +404,7 @@ class Game
 			
 			do
 			{
-				Text your(250,470,"YOUR TURN"); 
+				Text your(250,30,"YOUR TURN"); 
 				int start=getClick();
 				int start_i=(start/65536)/50-1;
 				int start_j=(start%65536)/50-1;
@@ -482,7 +482,7 @@ class Game
 												
 				else
 				{
-					Text t(250,485,"INVALID MOVE");
+					Text t(250,15,"INVALID MOVE");
 					wait(0.5);
 			
 				}
@@ -494,8 +494,7 @@ class Game
 			}while(true);
 			
 			check_result(1);
-			cout<<"not dissapearing"<<endl;
-			wait(1);
+			cout<<"not dissapearing"<<endl;			
 			for(int z=0;z<12;z++)
 			{
 				delete virt_user[z].c ;
@@ -521,8 +520,8 @@ class Game
 						
 			
 		{	
-			Text your(250,475,"MY TURN");			 
-			
+			Text your(250,30,"MY TURN");			 
+			wait(1);
 			int score[12];
 			
 			
@@ -938,11 +937,19 @@ class Game
 
 	void result(bool win)
 	{
+		for(int i=0;i<12;i++)
+		{
+			delete comp_piece[i].c;
+			delete user_piece[i].c;
+		}
+		
 		if(win)
 		{
-			Text cong(250,465,"Congratulations");
+			Text cong(250,15,"Congratulations");
+			cong.setColor(COLOR("blue"));
 			cong.imprint();
-			Text res(250,480,"YOU WIN!!");
+			Text res(250,30,"YOU WIN!!");
+			res.setColor(COLOR("blue"));
 			res.imprint();
 			getClick();
 			exit(0);
@@ -950,9 +957,11 @@ class Game
 		}
 		else
 		{
-			Text res(250,465,"YOU LOSE");
+			Text res(250,15,"YOU LOSE");
+			res.setColor(COLOR("blue"));
 			res.imprint();
-			Text luck(250,480,"Better Luck Next Time");
+			Text luck(250,30,"Better Luck Next Time");
+			luck.setColor(COLOR("blue"));
 			luck.imprint();
 			getClick();
 			exit(0);
@@ -1038,6 +1047,20 @@ void check_result(int i)
 
 int main()
 {
-	g.instructions();
+	int x;
+	initCanvas("Checkers",500,500);
+	{
+		Rectangle r1(125,250,250,500);
+		r1.setColor(COLOR(150,50,50));
+		r1.setFill(1);
+		Rectangle r2(375,250,250,500);
+		r2.setColor(COLOR(50,150,50));
+		r2.setFill(1);
+		Text ins(125,250,"INSTRUCTIONS");
+		Text play(375,250,"PLAY");
+		x=getClick();
+	}
+	if(x/65536<250)
+		g.instructions();
 	g.start();
 }
