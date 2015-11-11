@@ -558,7 +558,7 @@ void Game::start()
 									defeat[12+i]=0;
 						}
 						else if((end.i==0 or end.i==7) and virt_comp[i].is_valid(end,-1))
-							defeat[12*j+i]=20;
+							defeat[12*j+i]=0;
 						else
 							defeat[12*j+i]=-100;
 						
