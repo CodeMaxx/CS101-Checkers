@@ -344,13 +344,13 @@ void Game::start()
 			}
 			
 			
-			if(m!=12)
+			if(m!=12 && user_piece[m].cen.j!=0)
 			{
 				Rectangle r=Rectangle(start_i*50+75,start_j*50+75,50,50);
 				r.setColor(COLOR(0,100,100));
 				r.setFill(1);
 				Circle c=Circle(start_i*50+75,start_j*50+75,20);
-				c.setColor(COLOR("blue"));
+				c.setColor(COLOR("blue"));	
 				c.setFill(1);
 			
 			
